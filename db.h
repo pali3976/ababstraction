@@ -5,8 +5,8 @@ typedef struct treenode {
   struct treenode *right;
 } *TreeNode;
 
-void readFile(char *filename, char buffer[], TreeNode tree);
-void insert(TreeNode tree, char *insert_key, char *insert_value);
+void readFile(char *filename, char buffer[], TreeNode *tree);
+void insert(TreeNode *tree, char *insert_key, char *insert_value);
 
 /*
 
