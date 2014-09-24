@@ -4,8 +4,6 @@
 #include "db.h"
 
 
-
-
 void readline(char *dest, int n, FILE *source){
   fgets(dest, n, source);                             
   int len = strlen(dest);                             
@@ -13,20 +11,65 @@ void readline(char *dest, int n, FILE *source){
     dest[len-1] = '\0';
 }
 
+void readFile(char *filename, char buffer[], TreeNode tree){
+  printf("Loading database \"%s\"...\n\n", filename);
+  FILE *database = fopen(filename, "r");
+  char buffer2[128];
+
+  while(!feof(database)){
+  readline(buffer, 128, database);
+  readline(buffer2, 128, database);
+  insert(tree, buffer, buffer2);
+    }   
+}
+
+void insert(TreeNode tree, char *insert_key, char *insert_value){
+  printf("Test\n");
+  if (tree == NULL){
+    tree = malloc(sizeof(struct treenode));
+
+    tree->key = malloc(strlen(insert_key)+1);
+    strcpy(tree->key, insert_key);
+
+    tree->value = malloc(strlen(insert_value)+1);
+    strcpy(tree->value, insert_value);
+
+    tree->left = NULL;
+    tree->right = NULL;
+    return;
+  }
+
+  else if(strcmp(insert_key,tree->key) > 0){   // Right
+    insert(tree->right, insert_key, insert_value);
+  } 
+  else if(strcmp(insert_key,tree->key) < 0) {   // Left
+    insert(tree->left, insert_key, insert_value);
+  } 
+   
+  else if(strcmp(insert_key,tree->key) == 0) {
+    printf("key \"%s\" already exists!\n", insert_key);
+  }
+    
+}
+
+
+
+/*
+
   
 void readFile(char *filename, char buffer[], Node list){
   printf("Loading database \"%s\"...\n\n", filename);  
   FILE *database = fopen(filename, "r");
   
-  while(!(feof(database))){                            // !(Kollar om den är vid slutet av filen)
-    Node newNode = malloc(sizeof(struct node));        // Allokerar minne för noden
-    readline(buffer, 128, database);                   // Läser n.te raden i buffern
-    newNode->key = malloc(strlen(buffer) + 1);         // Allokerar plats för värdet i newNode nyckeln
-    strcpy(newNode->key, buffer);                      // Kopierar buffern och lägger in i newNodes nyckelnn
-    readline(buffer, 128, database);                   // Vi läser nyckelvärdet och sparar i buffern
-    newNode->value = malloc(strlen(buffer) + 1);       // Sätter nya newNode värdet till ... en minnesplats?
-    strcpy(newNode->value, buffer);                    // Kopierar in värdet in i buffern från newNode
-    newNode->next = list;                              // Lägger dem nya noderna efter varandra, så allt slutar på NULL
+  while(!(feof(database))){                          
+    Node newNode = malloc(sizeof(struct node));
+    readline(buffer, 128, database); 
+    newNode->key = malloc(strlen(buffer) + 1); 
+    strcpy(newNode->key, buffer); 
+    readline(buffer, 128, database); 
+    newNode->value = malloc(strlen(buffer) + 1); 
+    strcpy(newNode->value, buffer);   
+    newNode->next = list; 
     list = newNode; 
   }
 }
@@ -171,3 +214,4 @@ int print(Node list, Node cursor){
   }
   return -1;
 }
+*/

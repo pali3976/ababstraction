@@ -1,3 +1,15 @@
+typedef struct treenode {
+  char *key;
+  char *value;
+  struct treenode *left;
+  struct treenode *right;
+} *TreeNode;
+
+void readFile(char *filename, char buffer[], TreeNode tree);
+void insert(TreeNode tree, char *insert_key, char *insert_value);
+
+/*
+
 typedef struct node{
   char *key;
   char *value;
@@ -14,3 +26,4 @@ void update(char buffer[] ,Node cursor, Node list);
 void insert(char buffer[], Node cursor, Node list);
 void delete(char buffer[], Node cursor, Node list);
 int print(Node cursor, Node list);
+*/

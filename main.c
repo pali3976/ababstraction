@@ -8,11 +8,21 @@ int main(int argc, char *argv[]){
     puts("Usage: db [FILE]");
     return -1;
   }
+
   char buffer[128];
-  Node cursor;
-  Node list = NULL;
+  
+  TreeNode tree = NULL; 
+
+  readFile(argv[1], buffer, tree);
+
   
 
+
+
+  /*  
+
+  Node cursor;
+  Node list = NULL;
 
   printIntro();            //Prints starting message
   readFile(argv[1], buffer, list);       //Reads DB
@@ -38,5 +48,6 @@ int main(int argc, char *argv[]){
     }
     puts("");
   }
+*/
   return 0;
 }
