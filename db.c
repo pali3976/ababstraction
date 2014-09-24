@@ -11,7 +11,7 @@ void readline(char *dest, int n, FILE *source){
     dest[len-1] = '\0';
 }
 
-void readFile(char *filename, char buffer[], TreeNode *tree){
+void readFile(char *filename, char buffer[], TreeNode *pp_tree){
   printf("Loading database \"%s\"...\n\n", filename);
   FILE *database = fopen(filename, "r");
   char buffer2[128];
@@ -20,38 +20,38 @@ void readFile(char *filename, char buffer[], TreeNode *tree){
 
   readline(buffer, 128, database);
   readline(buffer2, 128, database);
-  insert(tree, buffer, buffer2);
+  insert(pp_tree, buffer, buffer2);
     }   
 }
 
-void insert(TreeNode *tree, char *insert_key, char *insert_value){
+void insert(TreeNode *pp_tree, char *insert_key, char *insert_value){
   printf("Test\n");
-  if (*tree == NULL){
+  if (*pp_tree == NULL){
 
-    TreeNode temp = NULL;
-    temp = malloc(sizeof(struct treenode));
+    TreeNode p_temp = NULL;
+    p_temp = malloc(sizeof(struct treenode));
 
-    temp->key = malloc(strlen(insert_key)+1);
-    strcpy(temp->key, insert_key);
+    p_temp->key = malloc(strlen(insert_key)+1);
+    strcpy(p_temp->key, insert_key);
 
-    temp->value = malloc(strlen(insert_value)+1);
-    strcpy(temp->value, insert_value);
+    p_temp->value = malloc(strlen(insert_value)+1);
+    strcpy(p_temp->value, insert_value);
 
-    temp->left = NULL;
-    temp->right = NULL;
-    *tree = temp;
+    p_temp->left = NULL;
+    p_temp->right = NULL;
+    *pp_tree = p_temp;
     
     return;
   }
 
-  else if(strcmp(insert_key,(*tree)->key) > 0){   // Right
-    insert(&(*tree)->right, insert_key, insert_value);
+  else if(strcmp(insert_key,(*pp_tree)->key) > 0){   // Right
+    insert(&(*pp_tree)->right, insert_key, insert_value);
   } 
-  else if(strcmp(insert_key,(*tree)->key) < 0) {   // Left
-    insert(&(*tree)->left, insert_key, insert_value);
+  else if(strcmp(insert_key,(*pp_tree)->key) < 0) {   // Left
+    insert(&(*pp_tree)->left, insert_key, insert_value);
   } 
    
-  else if(strcmp(insert_key,(*tree)->key) == 0) {
+  else if(strcmp(insert_key,(*pp_tree)->key) == 0) {
     printf("key \"%s\" already exists!\n", insert_key);
   }
     

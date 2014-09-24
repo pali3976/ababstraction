@@ -11,12 +11,12 @@ int main(int argc, char *argv[]){
 
   char buffer[128];
   
-  TreeNode tree = NULL;
+  TreeNode p_tree = NULL;
 
-  readFile(argv[1], buffer, &tree);
-printf("%s\n", tree->key );
-printf("%s\n", tree->left->key );
-  printf("%s\n", tree->right->key );
+  readFile(argv[1], buffer, &p_tree);
+printf("%s\n", p_tree->key );
+printf("%s\n", p_tree->left->key );
+  printf("%s\n", p_tree->right->key );
   
 
   
