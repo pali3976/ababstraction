@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "db.h"
-
+//Hej
 int main(int argc, char *argv[]){
   if (argc < 2){            // Om inget argument, avsluta
     puts("Usage: db [FILE]");
