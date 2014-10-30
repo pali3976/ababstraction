@@ -6,24 +6,12 @@ typedef struct treenode {
 } *TreeNode;
 
 void readFile(char *filename, char buffer[], TreeNode *pp_tree);
-void insert(TreeNode *pp_tree, char *insert_key, char *insert_value);
-
-/*
-
-typedef struct node{
-  char *key;
-  char *value;
-  struct node *next;
-} *Node;
-
-
-void readline(char *dest, int n, FILE *source);
+void insert(TreeNode *pp_tree, char *insert_key, char *insert_value, int *p_found);
+void insertValue(TreeNode *pp_tree, char buffer []);
+TreeNode findNode(TreeNode p_tree, char buffer[], int *found);
+void delete(TreeNode *pp_tree, char buffer[]);
+void update(TreeNode *pp_tree, char buffer[]);
+void query(TreeNode *pp_tree, char buffer[]);
 void printIntro(void);
 void printOption(void);
-void readFile(char *filename, char buffer[], Node list);
-void query(char buffer[], Node cursor, Node list);
-void update(char buffer[] ,Node cursor, Node list);
-void insert(char buffer[], Node cursor, Node list);
-void delete(char buffer[], Node cursor, Node list);
-int print(Node cursor, Node list);
-*/
+void printTree(TreeNode p_tree);
