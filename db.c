@@ -3,7 +3,37 @@
 #include <string.h>
 #include "db.h"
 
+typedef struct treenode {
+  char *key;
+  char *value;
+  struct treenode *left;
+  struct treenode *right;
+} *TreeNode;
 
+
+void printIntro(void){
+  puts("Welcome to");
+  puts(" ____    ____       ");
+  puts("/\\  _`\\ /\\  _`\\     ");
+  puts("\\ \\ \\/\\ \\ \\ \\L\\ \\   ");
+  puts(" \\ \\ \\ \\ \\ \\  _ <\\ ");
+  puts("  \\ \\ \\_\\ \\ \\ \\L\\ \\ ");
+  puts("   \\ \\____/\\ \\____/ ");
+  puts("    \\/___/  \\/___/  ");
+  puts(""); 
+}
+
+void printOption(void){
+  puts("PLEASE CHOOSE AN OPERATION");
+  puts("1. QUERY A KEY");
+  puts("2. UPDATE AN ENTRY");
+  puts("3. NEW ENTRY");
+  puts("4. Remove entry");
+  puts("5. Print database");
+  puts("0. Exit database");
+  printf("? "); 
+}
+ 
 void readline(char *dest, int n, FILE *source){
   fgets(dest, n, source);                             
   int len = strlen(dest);                             
@@ -18,12 +48,84 @@ void readFile(char *filename, char buffer[], TreeNode *pp_tree){
   int found = -1;
 
   while(!feof(database)){
-    // test++;
-  readline(buffer, 128, database);
-  readline(buffer2, 128, database);
-  insert(pp_tree, buffer, buffer2, &found);
-  //printf("%d",test);
-    }   
+    readline(buffer, 128, database);
+    readline(buffer2, 128, database);
+    insert(pp_tree, buffer, buffer2, &found);
+  }
+
+	fclose(database);
+}
+
+void insertValue(TreeNode *pp_tree,char buffer[]){
+  char buffer2[128];
+  int found = -1;
+  printf("Enter key: ");
+  readline(buffer, 128, stdin);
+  printf("Enter value: ");
+  readline(buffer2, 128, stdin);
+  puts("Searching database for duplicate keys...");
+  insert(pp_tree, buffer, buffer2,&found);
+
+  if(found != 0){
+    puts("Entry inserted successfully:");
+    printf("key: %s\nvalue: %s\n", buffer, buffer2);
+  }
+
+  else {
+    printf("key \"%s\" already exists!\n", buffer);
+  }
+}
+
+TreeNode returnPre(TreeNode p_tree, char buffer[]){
+  TreeNode temp = NULL;
+  if(p_tree == NULL){ 
+    return NULL;
+  }
+  if(strcmp((p_tree)->key, buffer) == 0){
+    return p_tree;
+  }
+  if(strcmp(buffer,(p_tree)->key) < 0 && p_tree->left != NULL){ //left
+    temp = (p_tree)->left;
+    if(strcmp((temp)->key, buffer) == 0){;
+      return p_tree;
+    } 
+    
+    else 
+      return returnPre(temp, buffer);
+  }
+  if(strcmp(buffer,(p_tree)->key) > 0 && p_tree->right != NULL){ //right
+    temp = (p_tree)->right;
+    if(strcmp((temp)->key, buffer) == 0){
+      return p_tree;
+    } 
+    
+    else return  returnPre(temp, buffer);
+  }
+  
+  else return NULL;
+}
+
+TreeNode findRightNode(TreeNode p_tree){
+  while(p_tree->right != NULL){
+    p_tree = p_tree->right;
+  }
+  return p_tree;
+}
+
+TreeNode findNode(TreeNode p_tree, char buffer[],int *found){
+  while(strcmp(buffer, p_tree->key) != 0){
+    if (strcmp(buffer, (p_tree)->key) < 0 && p_tree->left != NULL){ //left
+      p_tree = p_tree->left;
+    }
+    else if (strcmp(buffer, (p_tree)->key) > 0 && p_tree->right != NULL){ //right
+      p_tree = p_tree->right;	
+    }
+    else{
+      *found = 0;
+      return NULL;
+    }
+  }
+  return p_tree;
 }
 
 
@@ -56,44 +158,6 @@ void insert(TreeNode *pp_tree, char *insert_key, char *insert_value, int *p_foun
     *p_found = 0;
   }    
 }
-
-
-void insertValue(TreeNode *pp_tree,char buffer[]){
-  char buffer2[128];
-  int found = -1;
-  printf("Enter key: ");
-  readline(buffer, 128, stdin);
-  printf("Enter value: ");
-  readline(buffer2, 128, stdin);
-  puts("Searching database for duplicate keys...");
-  insert(pp_tree, buffer, buffer2,&found);
-
-  if(found != 0){
-    puts("Entry inserted successfully:");
-    printf("key: %s\nvalue: %s\n", buffer, buffer2);
-  }
-
-  else {
-    printf("key \"%s\" already exists!\n", buffer);
-  }
-}
-
-TreeNode findNode(TreeNode p_tree, char buffer[],int *found){
-  while(strcmp(buffer, p_tree->key) != 0){
-    if (strcmp(buffer, (p_tree)->key) < 0 && p_tree->left != NULL){ //left
-      p_tree = p_tree->left;
-    }
-    else if (strcmp(buffer, (p_tree)->key) > 0 && p_tree->right != NULL){ //right
-      p_tree = p_tree->right;	
-    }
-    else{
-      *found = 0;
-      return NULL;
-    }
-  }
-  return p_tree;
-}
-
 
 void query(TreeNode *pp_tree, char buffer[]){
   int found = -1;
@@ -128,6 +192,10 @@ void update(TreeNode *pp_tree, char buffer[]){
 }
 
 void printTree(TreeNode p_tree){
+  if(p_tree == NULL){
+    puts("\nThe tree is empty\n");
+    return;
+  }
   printf("%s\n%s\n", p_tree->key, p_tree->value);
   if(p_tree->left != NULL) { printTree(p_tree->left);}
   if(p_tree->right != NULL) { printTree(p_tree->right);}
@@ -135,32 +203,7 @@ void printTree(TreeNode p_tree){
 }
 
 
-TreeNode returnPre(TreeNode p_tree, char buffer[]){
-  TreeNode temp = NULL;
-  if(strcmp((p_tree)->key, buffer) < 0){ //left
-    temp = (p_tree)->left;
-    if(strcmp((temp)->key, buffer) == 0){
-      return p_tree;
-    } 
-    else return returnPre(temp, buffer);
-  }
-  else if(strcmp((p_tree)->key, buffer) > 0){ //right
-    temp = (p_tree)->right;
-    if(strcmp((temp)->key, buffer) == 0){
-      return p_tree;
-    } 
-    else return returnPre(temp, buffer);
-  }
 
-  else return NULL;
-}
-
-TreeNode findRightNode(TreeNode p_tree){
-  while(p_tree->right != NULL){
-    p_tree = p_tree->right;
-  }
-  return p_tree;
-}
 
 void delete(TreeNode *pp_tree, char buffer[]){
   int found = -1;
@@ -168,102 +211,113 @@ void delete(TreeNode *pp_tree, char buffer[]){
   readline(buffer,128,stdin);
   printf("\nSearching for node...\n\n");
   TreeNode deletedNode = findNode(*pp_tree, buffer, &found);
-  puts("FUNKAR\n");
  
-
-  //FREEEEEEEEEEE
   if(deletedNode == NULL){
     puts("Sorry, could not find a matching key\n\n");
     return;
   }
-
-  if(deletedNode->left == NULL && deletedNode->right == NULL){
-    *pp_tree = NULL;
+  
+  //Om rootnoden ska deletas
+  if(strcmp(deletedNode->key,(*pp_tree)->key) == 0){
+    //Om det endast finns en nod i trädet
+    if(deletedNode->left == NULL && deletedNode->right == NULL){
+      *pp_tree = NULL;
+      printf("Successfully deleted key: %s\n", deletedNode->key);
+      free(deletedNode);
+      return;
+    }
+    if(deletedNode->left != NULL && deletedNode->right != NULL){
+      TreeNode rNode = deletedNode->right;
+      TreeNode lNode = deletedNode->left;
+      TreeNode temp = findRightNode(lNode);
+	  
+      temp->right = rNode; 
+      *pp_tree = lNode;
+      
+      printf("Successfully deleted key: %s\n", deletedNode->key);
+      free(deletedNode);
+      return;
+	  
+    }
+    //Om det endast finns en vänsternod till roten
+    if(deletedNode->left != NULL){
+      *pp_tree = deletedNode->left;
+      printf("Successfully deleted key: %s\n", deletedNode->key);
+      free(deletedNode);
+      return;
+    }
+    //Om det endast finns en högernod till roten
+    if(deletedNode->right != NULL){
+      *pp_tree = deletedNode->right;
+      printf("Successfully deleted key: %s\n", deletedNode->key);
+      free(deletedNode);
+      return;
+    }
+    //Om det finns 2 noder till roten
   }
-  else if(deletedNode->left != NULL && deletedNode->right !=NULL){
-    puts("1.1");
-    TreeNode rNode = deletedNode->right;
-    TreeNode lNode = deletedNode->left;
-    TreeNode preNode = returnPre(*pp_tree,buffer);
-    TreeNode temp = findRightNode(*pp_tree);
-    puts("1.2");
+  //ej rotnod
+  else {
+    //Om noden som ska deletas inte har några barn
+    if(deletedNode->left == NULL && deletedNode->right == NULL){
+      TreeNode preNode = returnPre(*pp_tree,buffer);
+      if(strcmp(buffer,preNode->key) < 0){ //left
+	preNode->left = NULL;
+	printf("Successfully deleted key: %s\n", deletedNode->key);
+	free(deletedNode);
+	return;
+      }
 
-    printf("%s", temp->key);
-    temp->right = rNode;
-    preNode->left = lNode;
-  }
+      else{// right
+	preNode->right = NULL;
+	printf("Successfully deleted key: %s\n", deletedNode->key);
+	free(deletedNode);
+	return;
+      }
+    }
+    //Om noden som ska deletas har två barn
+    if(deletedNode->left != NULL && deletedNode->right !=NULL){
+      TreeNode rNode = deletedNode->right;
+      TreeNode lNode = deletedNode->left;
+      TreeNode preNode = returnPre(*pp_tree,buffer);
+      TreeNode temp = findRightNode(lNode);
+      if(strcmp(lNode->key,preNode->key) < 0){ //Left side
+	temp->right = rNode;
+        preNode->left = lNode;
+      }
+      else{ //Right side
+	temp->right = rNode;
+	preNode->right = lNode;
+      }
+      printf("Successfully deleted key: %s\n", deletedNode->key);
+      free(deletedNode);
+      return;
+    }
+    //Om noden som ska deletas bara har ett vänsterbarn
+    if(deletedNode->left != NULL){
 
-  else if(deletedNode->left != NULL){ //Check left
-    puts("2.0");
-    TreeNode lNode = deletedNode->left;
-    TreeNode preNode = returnPre(*pp_tree,buffer);
+      TreeNode lNode = deletedNode->left;
+      TreeNode preNode = returnPre(*pp_tree,buffer);
     
 
-    preNode->left = lNode;
-    return;
-  }
-  else if(deletedNode->right != NULL){ //Check right
-    puts("3.0");
-    TreeNode rNode = deletedNode->right;
-    puts("3.1");
-    TreeNode preNode = returnPre(*pp_tree,buffer);
-    puts("3.2");
+      preNode->left = lNode;
+      printf("Successfully deleted key: %s\n", deletedNode->key);
+      free(deletedNode);
+      return;
+
+    }
+    //Om noden som ska deletas bara har ett högerbarn
+    else if(deletedNode->right != NULL){
+      TreeNode rNode = deletedNode->right;
+      TreeNode preNode = returnPre(*pp_tree,buffer);
     
-    *((preNode)->right) = rNode;
-    return;
+      preNode->right = rNode;
+      printf("Successfully deleted key: %s\n", deletedNode->key);
+      free(deletedNode);
+      return;
+    }   
   }
-}
-
-
-void printIntro(void){
-  puts("Welcome to");
-  puts(" ____    ____       ");
-  puts("/\\  _`\\ /\\  _`\\     ");
-  puts("\\ \\ \\/\\ \\ \\ \\L\\ \\   ");
-  puts(" \\ \\ \\ \\ \\ \\  _ <\\ ");
-  puts("  \\ \\ \\_\\ \\ \\ \\L\\ \\ ");
-  puts("   \\ \\____/\\ \\____/ ");
-  puts("    \\/___/  \\/___/  ");
-  puts(""); 
-}
-
-void printOption(void){
-    puts("PLEASE CHOOSE AN OPERATION");
-    puts("1. QUERY A KEY");
-    puts("2. UPDATE AN ENTRY");
-    puts("3. NEW ENTRY");
-    puts("4. Remove entry");
-    puts("5. Print database");
-    puts("0. Exit database");
-    printf("? "); 
 }
  
-/*
 
-void delete(char buffer[], Node cursor, Node list){
-  printf("Enter key: ");
-  readline(buffer, 128, stdin);
-  puts("Searching database...\n");
-  int found = 0;
-  cursor = list;
-  Node prev = NULL;
-  while(!found && cursor != NULL){
-    if(strcmp(buffer, cursor->key) == 0){
-      if(prev == NULL){ // Delete first node
-	list = cursor->next;
-      }else{
-	prev->next = cursor->next;
-      }
-      found = 1;
-      printf("Deleted the following entry:\nkey: %s\nvalue: %s\n", cursor->key, cursor->value);
-    }else{
-      prev = cursor;
-      cursor = cursor->next;
-    }
-  }
-  if(!found){
-    printf("Could not find an entry matching key \"%s\"!\n", buffer);
-  }
-}
-*/
+
 
