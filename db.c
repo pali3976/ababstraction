@@ -25,9 +25,9 @@ void printIntro(void){
 
 void printOption(void){
   puts("PLEASE CHOOSE AN OPERATION");
-  puts("1. QUERY A KEY");
-  puts("2. UPDATE AN ENTRY");
-  puts("3. NEW ENTRY");
+  puts("1. Query a key");
+  puts("2. Update an entry");
+  puts("3. New entry");
   puts("4. Remove entry");
   puts("5. Print database");
   puts("0. Exit database");
@@ -41,9 +41,10 @@ void readline(char *dest, int n, FILE *source){
     dest[len-1] = '\0';
 }
 
-void readFile(char *filename, char buffer[], TreeNode *pp_tree){
+void readFile(char *filename, TreeNode *pp_tree){
   printf("Loading database \"%s\"...\n\n", filename);
   FILE *database = fopen(filename, "r");
+  char buffer[128];
   char buffer2[128];
   int found = -1;
 
@@ -53,10 +54,11 @@ void readFile(char *filename, char buffer[], TreeNode *pp_tree){
     insert(pp_tree, buffer, buffer2, &found);
   }
 
-	fclose(database);
+  fclose(database);
 }
 
-void insertValue(TreeNode *pp_tree,char buffer[]){
+void insertValue(TreeNode *pp_tree){
+  char buffer[128];
   char buffer2[128];
   int found = -1;
   printf("Enter key: ");
@@ -74,58 +76,6 @@ void insertValue(TreeNode *pp_tree,char buffer[]){
   else {
     printf("key \"%s\" already exists!\n", buffer);
   }
-}
-
-TreeNode returnPre(TreeNode p_tree, char buffer[]){
-  TreeNode temp = NULL;
-  if(p_tree == NULL){ 
-    return NULL;
-  }
-  if(strcmp((p_tree)->key, buffer) == 0){
-    return p_tree;
-  }
-  if(strcmp(buffer,(p_tree)->key) < 0 && p_tree->left != NULL){ //left
-    temp = (p_tree)->left;
-    if(strcmp((temp)->key, buffer) == 0){;
-      return p_tree;
-    } 
-    
-    else 
-      return returnPre(temp, buffer);
-  }
-  if(strcmp(buffer,(p_tree)->key) > 0 && p_tree->right != NULL){ //right
-    temp = (p_tree)->right;
-    if(strcmp((temp)->key, buffer) == 0){
-      return p_tree;
-    } 
-    
-    else return  returnPre(temp, buffer);
-  }
-  
-  else return NULL;
-}
-
-TreeNode findRightNode(TreeNode p_tree){
-  while(p_tree->right != NULL){
-    p_tree = p_tree->right;
-  }
-  return p_tree;
-}
-
-TreeNode findNode(TreeNode p_tree, char buffer[],int *found){
-  while(strcmp(buffer, p_tree->key) != 0){
-    if (strcmp(buffer, (p_tree)->key) < 0 && p_tree->left != NULL){ //left
-      p_tree = p_tree->left;
-    }
-    else if (strcmp(buffer, (p_tree)->key) > 0 && p_tree->right != NULL){ //right
-      p_tree = p_tree->right;	
-    }
-    else{
-      *found = 0;
-      return NULL;
-    }
-  }
-  return p_tree;
 }
 
 
@@ -159,36 +109,118 @@ void insert(TreeNode *pp_tree, char *insert_key, char *insert_value, int *p_foun
   }    
 }
 
-void query(TreeNode *pp_tree, char buffer[]){
+TreeNode returnPre(TreeNode p_tree, char oldKey[]){
+  TreeNode temp = NULL;
+  if(p_tree == NULL){ 
+    return NULL;
+  }
+  if(strcmp((p_tree)->key, oldKey) == 0){
+    return p_tree;
+  }
+  if(strcmp(oldKey,(p_tree)->key) < 0 && p_tree->left != NULL){ //left
+    temp = (p_tree)->left;
+    if(strcmp((temp)->key, oldKey) == 0){;
+      return p_tree;
+    } 
+    
+    else 
+      return returnPre(temp, oldKey);
+  }
+  if(strcmp(oldKey,(p_tree)->key) > 0 && p_tree->right != NULL){ //right
+    temp = (p_tree)->right;
+    if(strcmp((temp)->key, oldKey) == 0){
+      return p_tree;
+    } 
+    
+    else return  returnPre(temp, oldKey);
+  }
+  
+  else return NULL;
+}
+
+TreeNode findRightNode(TreeNode p_tree){
+  while(p_tree->right != NULL){
+    p_tree = p_tree->right;
+  }
+  return p_tree;
+}
+
+TreeNode findNode(TreeNode p_tree, char buffer[],int *found){
+  while(strcmp(buffer, p_tree->key) != 0){
+    if (strcmp(buffer, (p_tree)->key) < 0 && p_tree->left != NULL){ //left
+      p_tree = p_tree->left;
+    }
+    else if (strcmp(buffer, (p_tree)->key) > 0 && p_tree->right != NULL){ //right
+      p_tree = p_tree->right;	
+    }
+    else{
+      *found = 0;
+      return NULL;
+    }
+  }
+  return p_tree;
+}
+
+
+
+void hQuery(TreeNode *pp_tree){
+  char buffer[128];
   int found = -1;
   printf("Enter key: ");
   readline(buffer, 128,stdin);
 
-  TreeNode temp = findNode(*pp_tree, buffer, &found);
-
-  if(found != 0){
+  char *newValue = query(pp_tree, buffer);
+  if(strcmp(newValue,"NULL") != 0){
     puts("Matching entry found:");
-    printf("key: %s\nvalue: %s\n\n", temp->key, temp->value);
-
+    printf("key: %s\nvalue: %s\n\n", buffer, newValue);
   }
-  else printf("Sorry, could not find a matching key\n\n");
+  else {
+    printf("Sorry, could not find a matching key\n\n");
+  }
+  free(newValue);
 }
 
-void update(TreeNode *pp_tree, char buffer[]){
+char *query(TreeNode *pp_tree, char buffer[]){
   int found = -1;
-  printf("Enter key: ");
-  readline(buffer, 128, stdin);
-  printf("Searching for node...\n\n");
   TreeNode temp = findNode(*pp_tree, buffer, &found);
 
   if(found != 0){
-    printf("Found matching key\nEnter new value: ");
-    readline(buffer,128,stdin);
-    strcpy(temp->value,buffer);
-    printf("key: %s\nvalue: %s\n", temp->key, temp->value);
+    return temp->value;
   }
+  else return "NULL";
+}
 
-  else  printf("Sorry, could not find a matching key\n\n");
+void hUpdate(TreeNode *pp_tree){
+  char buffer[128];
+  char buffer2[128];
+  printf("Enter key: ");
+  readline(buffer, 128, stdin);
+  printf("Enter new desired value: ");
+  readline(buffer2, 128, stdin);
+  printf("Searching for node...\n\n");
+
+  char *newValue = update(*pp_tree,buffer,buffer2);
+  
+  if(strcmp(newValue,"NULL") != 0){
+    printf("Found matching key\n");
+    printf("New value (%s) is inserted\n",newValue);
+  }
+  else {
+    printf("Sorry, could not find a matching key\n\n");
+  }
+}
+
+char *update(TreeNode p_tree, char *buffer, char *buffer2){
+  int found = -1;
+  TreeNode temp = findNode(p_tree, buffer, &found);
+
+  if(found != 0){
+    free(temp->value);
+    temp->value = malloc(strlen(buffer2)+1);
+    strcpy(temp->value,buffer2);
+    return temp->value;
+  }
+  else return "NULL";
 }
 
 void printTree(TreeNode p_tree){
@@ -202,19 +234,29 @@ void printTree(TreeNode p_tree){
   return;
 }
 
-
-
-
-void delete(TreeNode *pp_tree, char buffer[]){
-  int found = -1;
+void hDelete(TreeNode *pp_tree){
+  char buffer[128];
   printf("Please enter key: ");
   readline(buffer,128,stdin);
   printf("\nSearching for node...\n\n");
-  TreeNode deletedNode = findNode(*pp_tree, buffer, &found);
- 
-  if(deletedNode == NULL){
+
+  char *deletedKey = delete(pp_tree, buffer);
+  if(strcmp(deletedKey,buffer) == 0){
+    printf("Successfully deleted key: %s\n", deletedKey);
+  }
+  else {
     puts("Sorry, could not find a matching key\n\n");
-    return;
+  }
+  free(deletedKey);
+}
+
+char *delete(TreeNode *pp_tree, char buffer[]){
+  int found = -1;
+  TreeNode deletedNode = findNode(*pp_tree, buffer, &found);
+  char *tempKey = malloc(128);
+
+  if(deletedNode == NULL){
+    return "NULL";
   }
   
   //Om rootnoden ska deletas
@@ -222,11 +264,11 @@ void delete(TreeNode *pp_tree, char buffer[]){
     //Om det endast finns en nod i trädet
     if(deletedNode->left == NULL && deletedNode->right == NULL){
       *pp_tree = NULL;
-      printf("Successfully deleted key: %s\n", deletedNode->key);
+      strcpy(tempKey, deletedNode->key);
       free(deletedNode);
-      return;
+      return tempKey;
     }
-    if(deletedNode->left != NULL && deletedNode->right != NULL){
+    else if(deletedNode->left != NULL && deletedNode->right != NULL){
       TreeNode rNode = deletedNode->right;
       TreeNode lNode = deletedNode->left;
       TreeNode temp = findRightNode(lNode);
@@ -234,24 +276,24 @@ void delete(TreeNode *pp_tree, char buffer[]){
       temp->right = rNode; 
       *pp_tree = lNode;
       
-      printf("Successfully deleted key: %s\n", deletedNode->key);
+      strcpy(tempKey, deletedNode->key);
       free(deletedNode);
-      return;
+      return tempKey;
 	  
     }
     //Om det endast finns en vänsternod till roten
-    if(deletedNode->left != NULL){
+    else if(deletedNode->left != NULL){
       *pp_tree = deletedNode->left;
-      printf("Successfully deleted key: %s\n", deletedNode->key);
+      strcpy(tempKey, deletedNode->key);
       free(deletedNode);
-      return;
+      return tempKey;
     }
     //Om det endast finns en högernod till roten
-    if(deletedNode->right != NULL){
+    else if(deletedNode->right != NULL){
       *pp_tree = deletedNode->right;
-      printf("Successfully deleted key: %s\n", deletedNode->key);
+      strcpy(tempKey, deletedNode->key);
       free(deletedNode);
-      return;
+      return tempKey;
     }
     //Om det finns 2 noder till roten
   }
@@ -262,16 +304,16 @@ void delete(TreeNode *pp_tree, char buffer[]){
       TreeNode preNode = returnPre(*pp_tree,buffer);
       if(strcmp(buffer,preNode->key) < 0){ //left
 	preNode->left = NULL;
-	printf("Successfully deleted key: %s\n", deletedNode->key);
+        strcpy(tempKey, deletedNode->key);
 	free(deletedNode);
-	return;
+	return tempKey;
       }
 
       else{// right
 	preNode->right = NULL;
-	printf("Successfully deleted key: %s\n", deletedNode->key);
+        strcpy(tempKey, deletedNode->key);
 	free(deletedNode);
-	return;
+	return tempKey;
       }
     }
     //Om noden som ska deletas har två barn
@@ -288,9 +330,9 @@ void delete(TreeNode *pp_tree, char buffer[]){
 	temp->right = rNode;
 	preNode->right = lNode;
       }
-      printf("Successfully deleted key: %s\n", deletedNode->key);
+      strcpy(tempKey, deletedNode->key);
       free(deletedNode);
-      return;
+      return tempKey;
     }
     //Om noden som ska deletas bara har ett vänsterbarn
     if(deletedNode->left != NULL){
@@ -300,9 +342,9 @@ void delete(TreeNode *pp_tree, char buffer[]){
     
 
       preNode->left = lNode;
-      printf("Successfully deleted key: %s\n", deletedNode->key);
+      strcpy(tempKey, deletedNode->key);
       free(deletedNode);
-      return;
+      return tempKey;
 
     }
     //Om noden som ska deletas bara har ett högerbarn
@@ -311,9 +353,9 @@ void delete(TreeNode *pp_tree, char buffer[]){
       TreeNode preNode = returnPre(*pp_tree,buffer);
     
       preNode->right = rNode;
-      printf("Successfully deleted key: %s\n", deletedNode->key);
+      strcpy(tempKey, deletedNode->key);
       free(deletedNode);
-      return;
+      return tempKey;
     }   
   }
 }
